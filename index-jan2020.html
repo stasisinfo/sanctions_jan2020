@@ -1,0 +1,117 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Iran Sanctions: A Visualization for the recent sanctions placed on Iran</img></title>
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/bubble_chart.css">
+</head>
+<body>
+    <style>
+.button{
+  display:inline-block;
+}
+
+  .xaxis path {
+
+opacity: 0.5;}
+
+.value{
+  pointer-events: auto;
+}
+  
+</style>
+              <header style="text-align:center;">
+                <h1>Iran Sanctions under the Trump Administration &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img src="icon.png" width="5%"></h1> 
+                <p>Tracking Iran-related U.S. Sanctions Designations</p>
+
+              </header>
+
+  
+
+    <div id="toolbar" style="text-align: center;">
+      <a href="#" id="all" class="button active" onclick="tagFunction('hide')">All Sanctions</a>
+      <a href="#" id="year" class="button" onclick="tagFunction('hide')">Sanctions By Year</a>
+      <a href="#" id="months" class="button" onclick="tagFunction('hide')">Sanctions Timeline</a>
+      <a href="#" id="type" class="button" onclick="tagFunction('hide')">Type of Designee</a>
+       <a href="#" id="kind" class="button" onclick="tagFunction('hide')">Kind of Sanctions</a>
+      <a href="#" id="NONIR" class="button" onclick="tagFunction('hide')">Nationality/Location</a>
+      <a href="#" class="button" id="toggle" onclick="tagFunction('show')">Sanctions Program</a>
+      <a href="map2020.html" id="map" class="button">Sanctions Map</a>
+            <br>
+<script>
+  function tagFunction(value) {
+  var x = document.getElementById("subline")
+  var y = document.getElementById("textarea");
+  var z = document.getElementById("textarea2");
+  if (value=="show") {
+    console.log("SHOW SUBLINE");
+    x.style.display = "block";
+    y.style.display = "block";
+    z.style.display = "none";
+  }
+  else if (value=="kinds") {
+    x.style.display = "none";
+    y.style.display = "none";
+    z.style.display = "block";
+  }
+
+   else {
+    x.style.display = "none";
+    y.style.display = "none";
+    z.style.display = "none";
+  }
+}
+</script>
+
+  <p id="subline" style="display:none;">
+    Tags: 
+    <a href="#" id="Terrorism" class="button2">Terrorism</a>
+   &nbsp
+    <a href="#" id="Human Rights" class="button2">Human Rights</a>
+    &nbsp
+    <a href="#" id="Proliferation" class="button2">WMD Proliferation</a>
+    &nbsp
+    <a href="#" id="IRGC" class="button2">IRGC </a>
+   <!-- <a href="#" id="NPWMD" class="button2">NPWMD</a>
+    <a href="#" id="SDGT" class="button2">SDGT</a>-->
+  
+  </p>
+  <div href="#" id="textarea" style="text-align:center;display:none;">
+Definition of the tags:
+The U.S. Department of the Treasury “tags” sanctions designation targets depending on the appropriate sanctions program(s). For example, the IRAN-HR tag refers to designees  under Executive Order 13553 (2010) on human rights. A full list of program tags is available<a href="https://www.treasury.gov/resource-center/sanctions/SDN-List/Pages/program_tags.aspx"> here</a></div>
+      <div href="#" id="textarea2" style="text-align:center;display:none;">
+        <p>                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                                  </p>
+The following categories break down sanctions under the Trump administration according to whether they were new designations, designations reimposed after having been previously suspended, designations reimposed and designated under <a href="https://www.treasury.gov/resource-center/sanctions/SDN-List/Pages/program_tags.aspx">additional sanctions programs (“tags”)</a>, or existing designations targeted under additional sanctions programs</div>
+
+    </div>
+
+
+
+    
+<div class="container">
+  <hr>
+<div style="width:10px;height:10px;background:#da0000;"></div>2017<br>
+  <div style="width:10px;height:10px;background:#2a52be;"></div>2018<br>
+    <div style="width:10px;height:10px;background:#239f40;"></div>2019<br>
+      <div style="width:10px;height:10px;background:#ffa500;"></div>2020<br>
+</p>
+    <div id="vis" style="text-align:center;"></div>
+
+</div>
+
+
+
+
+
+  <script src="lib/d3.js"></script>
+  <script src="src/tooltip.js"></script>
+  <script src="src/bubble_chart_jan2020.js"></script>
+
+
+
+
+</body>
+</html>

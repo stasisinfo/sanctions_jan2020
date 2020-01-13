@@ -1,0 +1,527 @@
+<!doctype html>
+<html>
+  <head>
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/bubble_chart.css">
+  <script src="src/tooltip2.js"></script>
+  </head>
+
+  <body>
+    <img src="icon.png" width="5%" align="right" style='transform: translate(-100%, 0%);'></img>
+<header style="text-align:center;">
+                <h1>Iran Sanctions under the Trump Administration</h1>
+                <p>Tracking Iran-related U.S. Sanctions Designations</p>
+              </header>
+  <div class="container">
+
+    <div id="toolbar">
+      <a href="index.html" id="all" class="button active">Back to All Sanctions</a>
+
+            <br>
+    </div>
+<p>
+  <div style="width:10px;height:10px;background:#801A86;"></div>Entity<br>
+    <div style="width:10px;height:10px;background:#FBB13C;"></div>Individual<br>
+      <div style="width:10px;height:10px;background:#43AA8B;"></div>Aircraft<br>
+       <div style="width:10px;height:10px;background:#F8333C;"></div>Vessel<br>
+
+</p>
+
+<style type="text/css">
+  path{fill:powderblue;stroke:black;stroke-width:1;}
+</style>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.9.2/d3.js"></script>
+<script src="data/data2020.js"></script>
+<script src="data/remademap.js"></script>
+
+<script>
+
+var width = 960,
+    height = 960,
+    center = [width / 2, height / 2];
+
+var projection = d3.geoMercator()
+    .translate([width / 2, height / 2])
+    .scale((width - 1) / 2 / Math.PI);
+
+  function zoomed() {
+    g.attr("transform", d3.event.transform);
+  }
+
+var zoom = d3.zoom()
+    .scaleExtent([1, 8])
+    .on("zoom", zoomed);
+
+
+var path = d3.geoPath()
+    .projection(projection);
+
+var svg = d3.select(".container").append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .attr("id","mapvis")
+    .style("text-align","center")
+  .append("g");
+
+var g = svg.append("g").attr('id','mapboi');
+
+
+
+
+
+    for(var i=0;i<mapinfo.length;i++){
+
+    g.append("path").attr("d",mapinfo[i]["path"]).attr("class",mapinfo[i]["country"]).style("fill","powderblue").style("stroke","#000000").style("stroke-width",1);
+
+  }
+
+
+
+
+/*d3.json("/mbostock/raw/4090846/world-50m.json", function(error, world) {
+  g.append("path")
+      .datum({type: "Sphere"})
+      .attr("class", "sphere")
+      .attr("d", path);
+
+  g.append("path")
+      .datum(topojson.merge(world, world.objects.countries.geometries))
+      .attr("class", "land")
+      .attr("d", path);
+
+  g.append("path")
+      .datum(topojson.mesh(world, world.objects.countries, function(a, b) { return a !== b; }))
+      .attr("class", "boundary")
+      .attr("d", path);
+});*/
+
+/*function zoomed() {
+  g.attr("transform", "translate(" + zoom.translate() + ")scale(" + zoom.scale() + ")");
+}*/
+
+
+
+d3.select(self.frameElement).style("height", height + "px");
+
+var buttoncolors={"zoom_in":"red","zoom_out":"green"};
+
+
+
+// Simplest possible buttons
+d3.select('#zoombar').selectAll('.button3').enter()
+    .append("rect")
+    .data(['zoom_in', 'zoom_out'])
+    .attr("id", function(d){return d;})
+    .attr("fill", function(d){return buttoncolors[d];})
+    .attr("y", 10).attr("width", 40).attr("height",20)
+    .attr("class","button3")
+    .attr("x", function(d,i){return 10 + 50*i});
+    //;
+    //.style("fill", function(d,i){console.log(d); return i ? "red" : "green";});
+
+// Control logic to zoom when buttons are pressed, keep zooming while they are
+// pressed, stop zooming when released or moved off of, not snap-pan when
+// moving off buttons, and restore pan on mouseup.
+
+var pressed = false;
+d3.select('#zoombar').selectAll('.button').on('mousedown', function(){
+    pressed = true;
+    disableZoom();
+    zoomButton(this.id === 'zoom_in')
+}).on('mouseup', function(){
+    pressed = false;
+}).on('mouseout', function(){
+    pressed = false;
+})
+svg.on("mouseup", function(){svg.call(zoom)});
+
+function disableZoom(){
+    svg.on("mousedown.zoom", null)
+       .on("touchstart.zoom", null)
+       .on("touchmove.zoom", null)
+       .on("touchend.zoom", null);
+}
+
+function zoomButton(zoom_in){
+    var scale = zoom.scale(),
+        extent = zoom.scaleExtent(),
+        translate = zoom.translate(),
+        x = translate[0], y = translate[1],
+        factor = zoom_in ? 1.3 : 1/1.3,
+        target_scale = scale * factor;
+
+    // If we're already at an extent, done
+    if (target_scale === extent[0] || target_scale === extent[1]) { return false; }
+    // If the factor is too much, scale it down to reach the extent exactly
+    var clamped_target_scale = Math.max(extent[0], Math.min(extent[1], target_scale));
+    if (clamped_target_scale != target_scale){
+        target_scale = clamped_target_scale;
+        factor = target_scale / scale;
+    }
+
+    // Center each vector, stretch, then put back
+    x = (x - center[0]) * factor + center[0];
+    y = (y - center[1]) * factor + center[1];
+
+    // Transition to the new view over 100ms
+    d3.transition().duration(100).tween("zoom", function () {
+        var interpolate_scale = d3.interpolate(scale, target_scale),
+            interpolate_trans = d3.interpolate(translate, [x,y]);
+        return function (t) {
+            zoom.scale(interpolate_scale(t))
+                .translate(interpolate_trans(t));
+            zoomed();
+        };
+    }).each("end", function(){
+        if (pressed) zoomButton(zoom_in);
+    });
+}
+svg
+    .call(zoom);
+    //.call(zoom.event);
+
+
+
+
+
+function bubbleChart() {
+  //console.log("INSIDE BUBBLE CHART NOW");
+  //var space=;
+  // Constants for sizing
+  var width = d3.select("#mapvis").attr("width");
+  var height = d3.select("#mapvis").attr("height");
+
+  // tooltip for mouseover functionality
+  var tooltip = floatingTooltip('gates_tooltip', 240);
+
+  // Locations to move bubbles towards, depending
+  // on which view mode is selected.
+  var center = { x: width / 2, y: height / 2 };
+
+  var yearCenters = {
+    2008: { x: width / 3, y: height / 2 },
+    2009: { x: width / 2, y: height / 2 },
+    2010: { x: 2 * width / 3, y: height / 2 }
+  };
+
+  // X locations of the year titles.
+  var yearsTitleX = {
+    2008: 160,
+    2009: width / 2,
+    2010: width - 160
+  };
+
+  // @v4 strength to apply to the position forces
+  var forceStrength = 0.1;
+
+  // These will be set in create_nodes and create_vis
+  var svg = null;
+  var bubbles = null;
+  var nodes = [];
+
+  // Charge function that is called for each node.
+  // As part of the ManyBody force.
+  // This is what creates the repulsion between nodes.
+  //
+  // Charge is proportional to the diameter of the
+  // circle (which is stored in the radius attribute
+  // of the circle's associated data.
+  //
+  // This is done to allow for accurate collision
+  // detection with nodes of different sizes.
+  //
+  // Charge is negative because we want nodes to repel.
+  // @v4 Before the charge was a stand-alone attribute
+  //  of the force layout. Now we can use it as a separate force!
+  function charge(d) {
+    return -Math.pow(d.radius, 1.0) * 0.005;
+  }
+
+  // Here we create a force layout and
+  // @v4 We create a force simulation now and
+  //  add forces to it.
+  var simulation = d3.forceSimulation()
+    .velocityDecay(0.2)
+    .force('x', d3.forceX().strength(forceStrength).x(center.x))
+    .force('y', d3.forceY().strength(forceStrength).y(center.y))
+    .force('charge', d3.forceManyBody().strength(charge))
+    .on('tick', ticked);
+
+  // @v4 Force starts up automatically,
+  //  which we don't want as there aren't any nodes yet.
+  simulation.stop();
+
+  // Nice looking colors - no reason to buck the trend
+  // @v4 scales now have a flattened naming scheme
+  var fillColor = d3.scaleOrdinal()
+    .domain(['entity', 'individual', 'aircraft','vessel'])
+    .range(['#801A86', '#FBB13C', '#43AA8B','#F8333C']);
+
+
+  /*
+   * This data manipulation function takes the raw data from
+   * the CSV file and converts it into an array of node objects.
+   * Each node will store data and visualization values to visualize
+   * a bubble.
+   *
+   * rawData is expected to be an array of data objects, read in from
+   * one of d3's loading functions like d3.csv.
+   *
+   * This function returns the new node array, with a node in that
+   * array for each element in the rawData input.
+   */
+   function getBoundingBoxCenter(selection) {
+  // get the DOM element from a D3 selection
+  // you could also use "this" inside .each()
+  var element = selection.node();
+  // use the native SVG interface to get the bounding box
+  var bbox = element.getBBox();
+  // return the center of the bounding box
+  return [bbox.x + bbox.width/2, bbox.y + bbox.height/2];
+}
+
+
+var locval=null;
+var area=null;
+var coord=[0,0];
+
+  function createNodes(rawData) {
+
+    //console.log("CREATING NODES NOW");
+    // Use the max total_amount in the data as the max in the scale's domain
+    // note we have to ensure the total_amount is a number.
+    var maxAmount = d3.max(rawData, function (d) { return +d.total_amount; });
+
+    // Sizes bubbles based on area.
+    // @v4: new flattened scale names.
+
+
+    // Use map() to convert raw data into node data.
+    // Checkout http://learnjsdata.com/ for more on
+    // working with data.
+    
+    var myNodes = rawData.map(function (d) {
+
+
+      if(d.Type=="individual"){
+        if(d.Nationality=="Multi national"){
+          locval=".Other";
+        }
+        else{
+        locval="."+d.Nationality.split(".").join("").replace(/ /g,'');
+        console.log("Nationality is "+locval);
+        if (locval=="."){
+          locval=".Other"
+        }
+        }
+      }
+      else{
+        locval="."+d["Location 1 - Country"].split(".").join("").replace(/ /g,'');
+        console.log("Country is "+locval);
+        if (locval=="."){
+          locval=".Other"
+        }
+      }
+
+      area=d3.select(locval);
+      coord=getBoundingBoxCenter(area);
+      //area.style("fill","#1111").style("stroke","#000000").style("stroke-width",1);
+      area.style("fill","#1111");
+      return {
+        id: d.ID,
+        radius: 5,
+        tags:d.Tag,
+        value: +d.total_amount,
+        name: d.Name,
+        country:d["Location 1 - Country"],
+        location:d.Nationality,
+        date: new Date(d.Date.replace(",", "")),
+        type:d.Type,
+        org: d.organization,
+        info:d.Info,
+        group: d.Type,
+        Place:(d.Type=="entity") ? 'Location: </span><span class="value">'+d["Location 1 - Country"]  : 'Nationality: </span><span class="value">'+d.Nationality,
+        year: d.start_year,
+        x: coord[0],
+        y: coord[1]
+      };
+    });
+
+
+
+
+    // sort them to prevent occlusion of smaller nodes.
+    myNodes.sort(function (a, b) { return b.value - a.value; });
+
+    return myNodes;
+  }
+var chart = function chart(selector, rawData) {
+    // convert raw data into nodes data
+    nodes = createNodes(iran);
+
+    // Create a SVG element inside the provided selector
+    // with desired size.
+    svg = d3.select('#mapboi');
+
+    // Bind nodes data to what will become DOM elements to represent them.
+    bubbles = svg.selectAll('.bubble')
+      .data(nodes, function (d) {return d.id; });
+
+    // Create new circle elements each with class `bubble`.
+    // There will be one circle.bubble for each object in the nodes array.
+    // Initially, their radius (r attribute) will be 0.
+    // @v4 Selections are immutable, so lets capture the
+    //  enter selection to apply our transtition to below.
+    var bubblesE = bubbles.enter().append('circle')
+      .classed('bubble', true)
+      .attr('r', 2)
+      .attr('fill', function (d) { return fillColor(d.group); })
+      .attr('stroke', function (d) { return d3.rgb(fillColor(d.group)).darker(); })
+      .attr('stroke-width', 1)
+      .on('mouseover', showDetail)
+      .on('mouseout', hideDetail);
+
+    //console.log("making bubbles here");
+    // @v4 Merge the original empty selection and the enter selection
+    bubbles = bubbles.merge(bubblesE);
+
+    // Fancy transition to make bubbles appear, ending with the
+    // correct radius
+    bubbles.transition()
+      .duration(2000)
+      .attr('r', 2);
+
+    // Set the simulation's nodes to our newly created nodes array.
+    // @v4 Once we set the nodes, the simulation will start running automatically!
+    simulation.nodes(nodes);
+
+    // Set initial layout to single group.
+    groupBubbles();
+  //simulation.restart();
+  };
+
+
+function splitCountry() {
+
+
+  force.on('tick', function(e) {
+   bubbles.each(moveToCountry(e.alpha))
+    .attr('r', function(d) {
+     if (resize == 1) {
+      return d.radius;
+     }
+    })
+    .attr('cx', function(d) {
+     return d.x;
+    })
+    .attr('cy', function(d) {
+     return d.y;
+    });
+  });
+
+  force.start();
+ }
+
+  function moveToCountry(alpha) {
+  return function(d) {
+   d.x = d.x + 0.1 * 0.1 * alpha * 1.1;
+   d.y = d.y + 0.1 * 0.1 * alpha * 1.1;
+  };
+ }
+
+  /*
+   * Callback function that is called after every tick of the
+   * force simulation.
+   * Here we do the acutal repositioning of the SVG circles
+   * based on the current x and y values of their bound node data.
+   * These x and y values are modified by the force simulation.
+   */
+  function ticked() {
+    bubbles
+      .attr('cx', function (d) { return d.x; })
+      .attr('cy', function (d) { return d.y; });
+  }
+
+  /*
+   * Provides a x value for each node to be used with the split by year
+   * x force.
+   */
+ 
+
+  /*
+   * Sets visualization in "single group mode".
+   * The year labels are hidden and the force layout
+   * tick function is set to move all nodes to the
+   * center of the visualization.
+   */
+  function groupBubbles() {
+    //hideYearTitles();
+
+    // @v4 Reset the 'x' force to draw the bubbles to the center.
+   simulation.force('x', d3.forceX().strength(forceStrength).x(function (d){return d.x}));
+   simulation.force('y', d3.forceY().strength(forceStrength).y(function (d){return d.y}));
+
+    // @v4 We can reset the alpha value and restart the simulation
+    simulation.alpha(1).restart();
+  }
+
+
+  /*
+   * Function called on mouseover to display the
+   * details of a bubble in the tooltip.
+   */
+  function showDetail(d) {
+    // change outline to indicate hover state.
+    d3.select(this).attr('stroke', 'black');
+
+//Name, Id, Date, No type needed., Kind, nationality for individual, vessel and craft and location for entity
+//button styling and spacing
+
+//name date nationality/location tags
+    var content = '<span class="name">Name: </span><span class="value">' +
+                  d.name +
+                  '</span><br/>' +
+                     '<span class="name">Date: </span><span class="value"> ' +
+   d.date.toString().substring(0,16) +
+   '</span><br/>' +
+  
+                  '<span class="name">'+d.Place+'</span><br/>'+
+                '<span class="name">Tags: </span><span class="value">' +
+                  d.tags + '</span><br/>'
+                  '<span class="name">Type: </span><span class="value">' +
+                  d.type + '</span><br/>';
+
+    tooltip.showTooltip(content, d3.event);
+  }
+
+  /*
+   * Hides tooltip
+   */
+  function hideDetail(d) {
+    // reset outline
+    d3.select(this)
+      .attr('stroke', d3.rgb(fillColor(d.group)).darker());
+
+    tooltip.hideTooltip();
+  }
+
+  /*
+   * Externally accessible function (this is attached to the
+   * returned chart function). Allows the visualization to toggle
+   * between "single group" and "split by year" modes.
+   *vi
+   * displayName is expected to be a string and either 'year' or 'all'.
+   */
+ 
+
+
+  // return the chart function from closure.
+  return chart;
+}
+var myBubbleChart = bubbleChart();
+myBubbleChart('#mapvis', iran);
+</script>
+
+</body>
+</html>
