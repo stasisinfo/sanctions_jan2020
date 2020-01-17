@@ -45803,7 +45803,7 @@ var typeCenters={
 
  var titleCenters = {
   "YES": {
-   x: width / 4,
+   x: width / 3.5,
    y: height / 2
   },
   "NO": {
@@ -45811,7 +45811,7 @@ var typeCenters={
    y: height / 2
   },
     "Yes": {
-   x: width / 4,
+   x: width / 3.5,
    y: height / 2
   },
   "No": {
@@ -46150,7 +46150,7 @@ var fillcolor;
     IRGC: d["IRGC"],
     NPWMD: (d.Tag.includes("NPWMD") === true) ? 'Yes' : 'No',
     SDGT: (d.Tag.includes("SDGT") === true) ? 'Yes' : 'No',
-    NONIR: ((d.Type=="individual" && d.Nationality=="Iran")||(d.Type!=="individual" && d.Location_Country=="Iran") === true) ? 'Yes' : 'No',
+    NONIR: ((d.Type=="individual" && d.Nationality=="Iran")||(d.Type!=="individual" && d["Location 1 - Country"]=="Iran") === true) ? 'Yes' : 'No',
     Terrorism_Status:d["Terrorism Status"],
     Proliferation:d["Proliferation Status"],
     Type: d.Type,
